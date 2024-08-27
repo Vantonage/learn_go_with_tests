@@ -32,6 +32,61 @@ func assertStrings(t testing.TB, got, want string) {
 	}
 }
 
+func TestAdd(t *testing.T) {
+	t.Run("adding new word", func(t *testing.T) {
+
+		dictionary := Dictionary{}
+		word := "test"
+		definition := "this is just a test"
+		dictionary.Add(word, definition)
+
+		assertDefinition(t, dictionary, word, definition)
+	})
+
+	t.Run("word already exists", func(t *testing.T) {
+		word := "test"
+		definition := "this is just a test"
+		dictionary := Dictionary{word: definition}
+		err := dictionary.Add(word, "new test")
+
+		assertError(t, err, ErrWordExists)
+		assertDefinition(t, dictionary, word, definition)
+	})
+
+}
+
+func TestUpdate(t *testing.T) {
+	t.Run("existing word", func(t *testing.T) {
+		word := "test"
+		definition := "this is just a test"
+		dictionary := Dictionary{word: definition}
+		newDefinition := "new definition"
+
+		dictionary.Update(word, newDefinition)
+
+		assertDefinition(t, dictionary, word, newDefinition)
+	})
+
+	t.Run("unknown word", func(t *testing.T) {
+		word := "test"
+		definition := "this is just a test"
+		dictionary := Dictionary{}
+		err := dictionary.Update(word, definition)
+
+		assertError(t, err, ErrWordDoesNotExist)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	word := "test"
+	definition := "this is just a test"
+
+	dictionary := Dictionary{word: definition}
+	dictionary.Delete(word)
+	_, err := dictionary.Search(word)
+	assertError(t, err, ErrNotFound)
+}
+
 func assertError(t testing.TB, got, want error) {
 	t.Helper()
 
@@ -40,16 +95,13 @@ func assertError(t testing.TB, got, want error) {
 	}
 }
 
-func TestAdd(t *testing.T) {
-	dictionary := Dictionary{}
-	dictionary.Add("test", "this is just a test")
+func assertDefinition(t testing.TB, dictionary Dictionary, word, definition string) {
+	t.Helper()
 
-	want := "this is just a test"
-	got, err := dictionary.Search("test")
+	got, err := dictionary.Search(word)
 	if err != nil {
 		t.Fatal("should find added word: ", err)
 
 	}
-
-	assertStrings(t, got, want)
+	assertStrings(t, got, definition)
 }
