@@ -4,12 +4,35 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
-func main() {
-	Countdown(os.Stdout)
+const finalWorld = "Go!"
+const countdownStart = 3
+
+type Sleeper interface {
+	Sleep()
 }
 
-func Countdown(out io.Writer) {
-	fmt.Fprintf(out, "3")
+func main() {
+	sleeper := &ConfigurableSleeper{}
+	Countdown(os.Stdout, sleeper)
+}
+
+func Countdown(out io.Writer, sleeper Sleeper) {
+	for i := countdownStart; i > 0; i-- {
+
+		fmt.Fprintln(out, i)
+		sleeper.Sleep()
+	}
+	fmt.Fprint(out, finalWorld)
+}
+
+type ConfigurableSleeper struct {
+	duration time.Duration
+	sleep    func(time.Duration)
+}
+
+func (c *ConfigurableSleeper) Sleep() {
+	c.sleep(c.duration)
 }
