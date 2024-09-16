@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	server := &PlayerServer{NewInMemoryPlayerScore()}
+	server := NewPlayerServer(NewInMemoryPlayerScore())
 	log.Fatal(http.ListenAndServe(":5000", server))
 }
